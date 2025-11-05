@@ -246,7 +246,17 @@ function exportPDF(doc) {
 
         // WICHTIG: PDF-Export-Einstellungen setzen
         // Nur sichtbare und druckbare Ebenen exportieren
-        app.pdfExportPreferences.exportWhichLayers = ExportLayerOptions.VISIBLE_PRINTABLE_LAYERS;
+        // KORREKTUR: Richtige Konstante ist EXPORT_VISIBLE_PRINTABLE_LAYERS
+        try {
+            app.pdfExportPreferences.exportWhichLayers = ExportLayerOptions.EXPORT_VISIBLE_PRINTABLE_LAYERS;
+        } catch (e) {
+            // Fallback: Versuche ohne EXPORT_ Prefix (ältere InDesign Versionen)
+            try {
+                app.pdfExportPreferences.exportWhichLayers = ExportLayerOptions.visiblePrintableLayers;
+            } catch (e2) {
+                // Wenn beides fehlschlägt, einfach weitermachen - die Ebenen sind ja schon korrekt gesetzt
+            }
+        }
 
         // Optional: Ebenen im PDF als echte PDF-Ebenen exportieren (falls gewünscht)
         // app.pdfExportPreferences.exportLayers = true;

@@ -58,20 +58,26 @@ function testEnvironment() {
 
     // ExportLayerOptions testen
     msg += "--- ExportLayerOptions Konstanten ---\n";
-    try {
-        msg += "ExportLayerOptions.ALL_LAYERS = " + ExportLayerOptions.ALL_LAYERS + "\n";
-    } catch (e) {
-        msg += "ExportLayerOptions.ALL_LAYERS: FEHLER - " + e.message + "\n";
-    }
-    try {
-        msg += "ExportLayerOptions.VISIBLE_LAYERS = " + ExportLayerOptions.VISIBLE_LAYERS + "\n";
-    } catch (e) {
-        msg += "ExportLayerOptions.VISIBLE_LAYERS: FEHLER - " + e.message + "\n";
-    }
-    try {
-        msg += "ExportLayerOptions.VISIBLE_PRINTABLE_LAYERS = " + ExportLayerOptions.VISIBLE_PRINTABLE_LAYERS + "\n";
-    } catch (e) {
-        msg += "ExportLayerOptions.VISIBLE_PRINTABLE_LAYERS: FEHLER - " + e.message + "\n";
+    // Teste alle möglichen Varianten
+    var layerOptionsTests = [
+        "ALL_LAYERS",
+        "EXPORT_ALL_LAYERS",
+        "allLayers",
+        "VISIBLE_LAYERS",
+        "EXPORT_VISIBLE_LAYERS",
+        "visibleLayers",
+        "VISIBLE_PRINTABLE_LAYERS",
+        "EXPORT_VISIBLE_PRINTABLE_LAYERS",
+        "visiblePrintableLayers"
+    ];
+
+    for (var t = 0; t < layerOptionsTests.length; t++) {
+        try {
+            var testValue = eval("ExportLayerOptions." + layerOptionsTests[t]);
+            msg += "✓ ExportLayerOptions." + layerOptionsTests[t] + " = " + testValue + "\n";
+        } catch (e) {
+            msg += "✗ ExportLayerOptions." + layerOptionsTests[t] + " - NICHT VERFÜGBAR\n";
+        }
     }
     msg += "\n";
 
@@ -381,11 +387,20 @@ function exportPDF(doc) {
         alert("DEBUG: Verwende PDF-Preset: " + presetName);
 
         // KRITISCH: PDF-Export-Einstellungen setzen
+        var layerOptionSet = false;
         try {
-            app.pdfExportPreferences.exportWhichLayers = ExportLayerOptions.VISIBLE_PRINTABLE_LAYERS;
-            alert("DEBUG: exportWhichLayers gesetzt auf VISIBLE_PRINTABLE_LAYERS");
+            app.pdfExportPreferences.exportWhichLayers = ExportLayerOptions.EXPORT_VISIBLE_PRINTABLE_LAYERS;
+            alert("DEBUG: exportWhichLayers gesetzt auf EXPORT_VISIBLE_PRINTABLE_LAYERS");
+            layerOptionSet = true;
         } catch (e) {
-            alert("WARNUNG: Konnte exportWhichLayers nicht setzen:\n" + e.message);
+            alert("WARNUNG: EXPORT_VISIBLE_PRINTABLE_LAYERS nicht verfügbar:\n" + e.message + "\n\nVersuche Fallback...");
+            try {
+                app.pdfExportPreferences.exportWhichLayers = ExportLayerOptions.visiblePrintableLayers;
+                alert("DEBUG: Fallback erfolgreich - visiblePrintableLayers gesetzt");
+                layerOptionSet = true;
+            } catch (e2) {
+                alert("WARNUNG: Beide Versuche fehlgeschlagen:\n" + e2.message + "\n\nEbenen sind trotzdem korrekt gesetzt.");
+            }
         }
 
         // PDF exportieren
