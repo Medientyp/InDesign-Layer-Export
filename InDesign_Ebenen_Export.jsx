@@ -223,25 +223,46 @@ function exportPDF(doc) {
             saveFile = new File(saveFile.fullName + ".pdf");
         }
 
-        // PDF-Exportvorgabe verwenden (Standard oder benutzerdefiniert)
-        var pdfPreset;
+        // PDF-Exportvorgabe finden
+        var pdfPreset = null;
 
-        try {
-            // Versuche "High Quality Print" Vorgabe zu verwenden (ohne eckige Klammern)
-            pdfPreset = app.pdfExportPresets.item("High Quality Print");
-        } catch (e) {
+        // Prüfe ob überhaupt Presets vorhanden sind
+        if (app.pdfExportPresets.length === 0) {
+            alert("Keine PDF-Exportvorgaben gefunden!\n\nBitte erstellen Sie mindestens eine PDF-Vorgabe:\nDatei > Adobe PDF-Vorgaben > Definieren...");
+            return false;
+        }
+
+        // Versuche bekannte Preset-Namen zu finden
+        var presetNames = [
+            "High Quality Print",
+            "[High Quality Print]",
+            "Hohe Qualität",
+            "[Hohe Qualität]",
+            "Press Quality",
+            "[Press Quality]"
+        ];
+
+        for (var i = 0; i < presetNames.length; i++) {
             try {
-                // Versuche mit eckigen Klammern (alte Versionen)
-                pdfPreset = app.pdfExportPresets.item("[High Quality Print]");
-            } catch (e2) {
-                // Falls nicht vorhanden, erste verfügbare Vorgabe verwenden
-                if (app.pdfExportPresets.length > 0) {
-                    pdfPreset = app.pdfExportPresets[0];
-                } else {
-                    alert("Keine PDF-Exportvorgabe gefunden. Bitte erstellen Sie eine Vorgabe in InDesign.");
-                    return false;
+                var testPreset = app.pdfExportPresets.itemByName(presetNames[i]);
+                if (testPreset.isValid) {
+                    pdfPreset = testPreset;
+                    break;
                 }
+            } catch (e) {
+                // Diesen Namen gibt es nicht, nächsten probieren
             }
+        }
+
+        // Falls keiner gefunden wurde, nimm das erste verfügbare Preset
+        if (pdfPreset === null || !pdfPreset.isValid) {
+            pdfPreset = app.pdfExportPresets[0];
+        }
+
+        // Letzte Sicherheitsprüfung
+        if (!pdfPreset || !pdfPreset.isValid) {
+            alert("Konnte keine gültige PDF-Exportvorgabe finden!\n\nVerfügbare Vorgaben: " + app.pdfExportPresets.length);
+            return false;
         }
 
         // WICHTIG: PDF-Export-Einstellungen setzen

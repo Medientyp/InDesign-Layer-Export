@@ -351,6 +351,14 @@ function exportPDF(doc) {
         var pdfPreset = null;
         var presetName = "";
 
+        alert("DEBUG: Verfügbare PDF-Presets: " + app.pdfExportPresets.length);
+
+        // Prüfe ob überhaupt Presets vorhanden sind
+        if (app.pdfExportPresets.length === 0) {
+            alert("FEHLER: Keine PDF-Exportvorgaben gefunden!\n\nBitte erstellen Sie mindestens eine PDF-Vorgabe:\nDatei > Adobe PDF-Vorgaben > Definieren...");
+            return false;
+        }
+
         // Verschiedene Namen ausprobieren
         var presetNames = [
             "High Quality Print",
@@ -365,22 +373,28 @@ function exportPDF(doc) {
 
         for (var i = 0; i < presetNames.length; i++) {
             try {
-                pdfPreset = app.pdfExportPresets.item(presetNames[i]);
-                presetName = presetNames[i];
-                break;
+                var testPreset = app.pdfExportPresets.itemByName(presetNames[i]);
+                if (testPreset.isValid) {
+                    pdfPreset = testPreset;
+                    presetName = presetNames[i];
+                    alert("DEBUG: Gefundenes Preset: " + presetName);
+                    break;
+                }
             } catch (e) {
                 // Nächsten Namen probieren
             }
         }
 
-        // Falls keiner gefunden wurde, erste Vorgabe verwenden
-        if (pdfPreset === null && app.pdfExportPresets.length > 0) {
+        // Falls keiner gefunden wurde, nimm das erste verfügbare Preset
+        if (pdfPreset === null || !pdfPreset.isValid) {
             pdfPreset = app.pdfExportPresets[0];
             presetName = pdfPreset.name;
+            alert("DEBUG: Verwende erstes verfügbares Preset: " + presetName);
         }
 
-        if (pdfPreset === null) {
-            alert("FEHLER: Keine PDF-Exportvorgabe gefunden!");
+        // Letzte Sicherheitsprüfung
+        if (!pdfPreset || !pdfPreset.isValid) {
+            alert("FEHLER: Konnte keine gültige PDF-Exportvorgabe finden!");
             return false;
         }
 
