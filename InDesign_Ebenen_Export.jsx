@@ -16,13 +16,31 @@
 
 // Hauptfunktion
 function main() {
+    // Prüfen ob InDesign läuft und initialisiert ist
+    if (typeof app === 'undefined' || app.name.indexOf("InDesign") === -1) {
+        alert("Dieses Skript muss in Adobe InDesign ausgeführt werden.");
+        return;
+    }
+
     // Prüfen ob ein Dokument geöffnet ist
-    if (app.documents.length === 0) {
+    if (!app.documents.length || app.documents.length === 0) {
         alert("Bitte öffnen Sie zuerst ein InDesign-Dokument.");
         return;
     }
 
-    var doc = app.activeDocument;
+    // Prüfen ob activeDocument verfügbar ist
+    var doc;
+    try {
+        doc = app.activeDocument;
+    } catch (e) {
+        alert("Kein aktives Dokument gefunden. Bitte klicken Sie ins Dokument-Fenster.");
+        return;
+    }
+
+    if (!doc) {
+        alert("Kein aktives Dokument gefunden. Bitte öffnen Sie ein Dokument.");
+        return;
+    }
 
     // Prüfen ob Ebenen vorhanden sind
     if (doc.layers.length === 0) {

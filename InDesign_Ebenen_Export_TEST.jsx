@@ -93,6 +93,12 @@ function testEnvironment() {
 
 // Hauptfunktion
 function main() {
+    // Prüfen ob InDesign läuft und initialisiert ist
+    if (typeof app === 'undefined' || app.name.indexOf("InDesign") === -1) {
+        alert("Dieses Skript muss in Adobe InDesign ausgeführt werden.");
+        return;
+    }
+
     // SCHRITT 1: Umgebungstest
     var testResult = testEnvironment();
 
@@ -105,12 +111,24 @@ function main() {
     alert("Umgebungstest abgeschlossen!\n\nDie Ergebnisse wurden gespeichert:\n" + testFile.fsName + "\n\nBitte prüfe diese Datei und sende mir die Informationen.");
 
     // Prüfen ob ein Dokument geöffnet ist
-    if (app.documents.length === 0) {
+    if (!app.documents.length || app.documents.length === 0) {
         alert("STOP: Bitte öffne zuerst ein InDesign-Dokument mit mehreren Ebenen.");
         return;
     }
 
-    var doc = app.activeDocument;
+    // Prüfen ob activeDocument verfügbar ist
+    var doc;
+    try {
+        doc = app.activeDocument;
+    } catch (e) {
+        alert("STOP: Kein aktives Dokument gefunden.\nFehler: " + e.message + "\n\nBitte klicke ins Dokument-Fenster und versuche es erneut.");
+        return;
+    }
+
+    if (!doc) {
+        alert("STOP: Kein aktives Dokument gefunden. Bitte öffne ein Dokument.");
+        return;
+    }
 
     // Prüfen ob Ebenen vorhanden sind
     if (doc.layers.length === 0) {
