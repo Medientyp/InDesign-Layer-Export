@@ -279,6 +279,13 @@ function exportPDF(doc) {
             }
         }
 
+        // HYPERLINKS AKTIVIEREN - für interaktive PDFs
+        try {
+            app.pdfExportPreferences.includeHyperlinks = true;
+        } catch (e) {
+            // Bei älteren InDesign-Versionen ignorieren
+        }
+
         // Optional: Ebenen im PDF als echte PDF-Ebenen exportieren (falls gewünscht)
         // app.pdfExportPreferences.exportLayers = true;
 

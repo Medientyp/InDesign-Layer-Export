@@ -417,6 +417,14 @@ function exportPDF(doc) {
             }
         }
 
+        // HYPERLINKS AKTIVIEREN - für interaktive PDFs
+        try {
+            app.pdfExportPreferences.includeHyperlinks = true;
+            alert("DEBUG: includeHyperlinks aktiviert");
+        } catch (e) {
+            alert("WARNUNG: includeHyperlinks konnte nicht gesetzt werden:\n" + e.message);
+        }
+
         // PDF exportieren
         try {
             doc.exportFile(ExportFormat.PDF_TYPE, saveFile, false, pdfPreset);
